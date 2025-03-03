@@ -1,0 +1,35 @@
+name: Template Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Test template monthly
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+    
+    - name: Validate Template
+      run: |
+        yarn install
+        yarn typecheck
+        yarn lint
+        yarn test
+        yarn build
+    
+    - name: Validate Docker Build
+      run: |
+        docker compose build
+        docker compose -f docker-compose.prod.yml build 
