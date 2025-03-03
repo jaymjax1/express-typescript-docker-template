@@ -36,9 +36,12 @@ A production-ready template for Express.js applications with TypeScript and Dock
 
 ## Documentation
 
-- [Development Guide](DEVELOPMENT.md)
-- [API Documentation](docs/API.md) (create this if needed)
-- [Deployment Guide](docs/DEPLOYMENT.md) (create this if needed)
+- [Development Guide](docs/guides/DEVELOPMENT.md)
+- [API Documentation](docs/guides/API.md)
+- [Deployment Guide](docs/guides/DEPLOYMENT.md)
+- [Contributing Guidelines](docs/community/CONTRIBUTING.md)
+- [Code of Conduct](docs/community/CODE_OF_CONDUCT.md)
+- [Security Policy](docs/community/SECURITY.md)
 
 ## License
 

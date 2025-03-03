@@ -1,6 +1,14 @@
 {
   "name": "express-typescript-docker-template",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaymjax1/express-typescript-docker-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jaymjax1/express-typescript-docker-template/issues"
+  },
+  "homepage": "https://github.com/jaymjax1/express-typescript-docker-template#readme",
   "description": "Express.js TypeScript Docker template with full development setup",
   "main": "dist/app.js",
   "scripts": {
@@ -22,7 +30,7 @@
     "prepare": "husky install"
   },
   "author": "justin jackson",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
