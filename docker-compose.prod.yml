@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   api:
-    container_name: cc-backend-api-prod
+    container_name: backend-api-prod
     build: 
       context: .
       target: production
@@ -28,8 +28,8 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - cc-network-prod
+      - express-network-prod
 
 networks:
-  cc-network-prod:
+  express-network-prod:
     driver: bridge 

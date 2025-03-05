@@ -1,6 +1,6 @@
 services:
   api:
-    container_name: cc-backend-api
+    container_name: backend-api-dev
     restart: always
     build: 
       context: .
@@ -25,8 +25,8 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - cc-network  # Add network for potential service communication
+      - express-network  # Add network for potential service communication
 
 networks:
-  cc-network:
+  express-network:
     driver: bridge
