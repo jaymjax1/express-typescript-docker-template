@@ -1,15 +1,13 @@
 import dotenv from 'dotenv';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
 import morgan from 'morgan';
-import logger from './utils/logger';
-import { DatabaseFactory } from './infrastructure/database/DatabaseFactory';
-import { DatabaseType, DatabaseConfig } from './core/types/DatabaseTypes';
-import { UserService } from './services/UserService';
-import { User } from './core/entities/User';
-import { LanguageModelFactory } from './infrastructure/ai/LanguageModelFactory';
-import { ModelType } from './core/types/LanguageModelTypes';
-import { AIService } from './services/AIService';
-import { MockLanguageModelFactory } from './infrastructure/ai/MockLanguageModelFactory';
+import logger from '@/shared/utils/logger';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
+import { allRoutes } from '@/routes';
+import { errorHandler } from '@/interfaces/middlewares/errorHandler';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,8 +15,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
+// Basic middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // HTTP request logging
 app.use(
@@ -29,77 +28,40 @@ app.use(
   })
 );
 
-const dbConfig: DatabaseConfig = {
-  type: DatabaseType.POSTGRES,
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'myapp',
-};
+// Security middleware
+app.use(helmet()); // Adds various HTTP headers for security
+app.use(
+  cors({
+    // Cross-Origin Resource Sharing
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+  })
+);
 
-// Create database instance
-const db = DatabaseFactory.createDatabase<User>(dbConfig);
-
-// Create service
-const userService = new UserService(db);
-
-// Create AI model instance
-const factory = process.env.NODE_ENV === 'test' ? MockLanguageModelFactory : LanguageModelFactory;
-
-const aiModel = factory.createModel({
-  type: ModelType.OPENAI,
-  apiKey: process.env.OPENAI_API_KEY,
-  model: 'gpt-3.5-turbo',
-  defaultOptions: {
-    temperature: 0.7,
-    maxTokens: 500,
-  },
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
 });
+app.use(limiter);
 
-// Create AI service
-const aiService = new AIService(aiModel);
+// Prevent HTTP Parameter Pollution
+app.use(hpp());
+
+// Additional recommended security settings
+app.disable('x-powered-by');
 
 // Routes
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
-});
+app.use('/api', allRoutes()); // Mount all routes under /api
 
-app.get('/health', (req: Request, res: Response) => {
-  res.send('OK');
-});
-
-// Use in routes
-app.post('/users', async (req: Request, res: Response) => {
-  try {
-    const user = await userService.createUser(req.body);
-    res.json(user);
-  } catch (error) {
-    logger.error('Error creating user:', error);
-    res.status(500).json({ error: 'Failed to create user' });
-  }
-});
-
-app.post('/ai/generate', async (req: Request, res: Response) => {
-  try {
-    const response = await aiService.generateResponse(req.body.prompt, req.body.options);
-    res.json(response);
-  } catch (error) {
-    logger.error('Error generating AI response:', error);
-    res.status(500).json({ error: 'Failed to generate response' });
-  }
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ error: 'Not Found' });
 });
 
 // Error handling middleware
-app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
-  logger.error('Unhandled error:', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-  });
-  res.status(500).send('Something broke!');
-});
+app.use(errorHandler);
 
 // Only start the server if this file is run directly
 if (require.main === module) {
