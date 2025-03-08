@@ -10,7 +10,6 @@ export const createAuthRouter = () => {
   const authController = new AuthController(authService);
 
   router.post('/send-otp', authController.sendOtp);
-
   router.post('/verify-otp', authController.verifyOtp);
 
   return router;

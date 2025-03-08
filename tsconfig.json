@@ -27,7 +27,7 @@
 
     /* Modules */
     "module": "CommonJS",
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "dist",
     "moduleResolution": "node",                     /* Specify how TypeScript looks up a file from a given module specifier. */
     "baseUrl": ".",
